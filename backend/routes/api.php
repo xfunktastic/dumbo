@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\auth\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +16,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Iniciar Sesión
+Route::post('login',[AuthController::class,'login']);
+
+//Visualizar Usuarios
+Route::get('/admin/users',[UserController::class,'index']);
+//Crear Usuario
+Route::post('/admin/users',[UserController::class,'store']);
+//Editar Usuario
+Route::put('/admin/users{rut}',[UserController::class,'update']);
+//Eliminar Usuario
+Route::delete('/admin/users{rut}',[UserController::class,'destroy']);
+//Buscar por Usuario Rut
+Route::get('/admin/users{rut}',[UserController::class,'showRut']);
+//Buscar por Usuario Email
+Route::get('/admin/users{email}',[AuthController::class,'showEmail']);
+//Cerrar Sesión
+Route::post('/logout',[AuthController::class,'logout']);
+
+

@@ -20,7 +20,7 @@ class AdminSeeder extends Seeder
             'email' => '',
             'points' => null,
             'username' => 'Ochietto',
-            'password' => 'Jaqamain3pals',
+            'password' => bcrypt('Jaqamain3pals'),
         ]);
     }
 }
