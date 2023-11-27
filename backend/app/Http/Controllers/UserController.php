@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -11,46 +13,86 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        //Buscar Usuarios
+        $users = User::where('rut','<>','admin')->get();
+        return response()->json($users);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        //Crear Usuario
+        $validator = Validator::make($request->all(), [
+            'rut' => 'required|string|regex:/^[0-9]{1,8}-[0-9kK]{1}$/i|unique:users',
+            'name' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email|unique:users',
+            'points' => 'required|integer',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        // Crear Usuario
+        $user = User::create($request->all());
+
+        return response()->json($user, 201);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $rut)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|email|unique:users,email,' . $rut,
+            'points' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $user = User::where('rut', $rut)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+
+        $user->update($request->all());
+        return response()->json($user, 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(string $rut)
     {
-        //
+        $user = User::where('rut', $rut)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => 'Usuario eliminado exitosamente'], 200);
     }
 
-        /**
-     * Display the specified resource.
-     */
-    public function showRut()
+    public function showRut(string $rut)
     {
-        //
+        // Buscar Usuario por Rut
+        $user = User::where('rut', $rut)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+        return response()->json($user);
     }
 
-        /**
-     * Display the specified resource.
-     */
-    public function showEmail()
+    public function showEmail(string $email)
     {
-        //
+        // Buscar Usuario por Email
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+        return response()->json($user);
     }
 }
